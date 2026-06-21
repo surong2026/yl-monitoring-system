@@ -1,0 +1,31 @@
+{
+  "standard_code": "GB3095-2012",
+  "title": "环境空气质量标准",
+  "element_type": "air_ambient",
+  "version_year": 2012,
+  "description": "适用于环境空气质量评价与管理",
+  "class_levels": ["I", "II"],
+  "parameters": [
+    {"code": "SO2_annual", "name": "二氧化硫(SO2)年平均", "unit": "μg/m³", "class_I": 20, "class_II": 60, "operator": "<="},
+    {"code": "SO2_24h", "name": "二氧化硫(SO2)24小时平均", "unit": "μg/m³", "class_I": 50, "class_II": 150, "operator": "<="},
+    {"code": "SO2_1h", "name": "二氧化硫(SO2)1小时平均", "unit": "μg/m³", "class_I": 150, "class_II": 500, "operator": "<="},
+    {"code": "NO2_annual", "name": "二氧化氮(NO2)年平均", "unit": "μg/m³", "class_I": 40, "class_II": 40, "operator": "<="},
+    {"code": "NO2_24h", "name": "二氧化氮(NO2)24小时平均", "unit": "μg/m³", "class_I": 80, "class_II": 80, "operator": "<="},
+    {"code": "NO2_1h", "name": "二氧化氮(NO2)1小时平均", "unit": "μg/m³", "class_I": 200, "class_II": 200, "operator": "<="},
+    {"code": "CO_24h", "name": "一氧化碳(CO)24小时平均", "unit": "mg/m³", "class_I": 4, "class_II": 4, "operator": "<="},
+    {"code": "CO_1h", "name": "一氧化碳(CO)1小时平均", "unit": "mg/m³", "class_I": 10, "class_II": 10, "operator": "<="},
+    {"code": "O3_8h", "name": "臭氧(O3)日最大8小时平均", "unit": "μg/m³", "class_I": 100, "class_II": 160, "operator": "<="},
+    {"code": "O3_1h", "name": "臭氧(O3)1小时平均", "unit": "μg/m³", "class_I": 160, "class_II": 200, "operator": "<="},
+    {"code": "PM10_annual", "name": "PM10年平均", "unit": "μg/m³", "class_I": 40, "class_II": 70, "operator": "<="},
+    {"code": "PM10_24h", "name": "PM10 24小时平均", "unit": "μg/m³", "class_I": 50, "class_II": 150, "operator": "<="},
+    {"code": "PM25_annual", "name": "PM2.5年平均", "unit": "μg/m³", "class_I": 15, "class_II": 35, "operator": "<="},
+    {"code": "PM25_24h", "name": "PM2.5 24小时平均", "unit": "μg/m³", "class_I": 35, "class_II": 75, "operator": "<="},
+    {"code": "TSP_annual", "name": "TSP年平均", "unit": "μg/m³", "class_I": 80, "class_II": 200, "operator": "<="},
+    {"code": "TSP_24h", "name": "TSP 24小时平均", "unit": "μg/m³", "class_I": 120, "class_II": 300, "operator": "<="},
+    {"code": "NOx_annual", "name": "氮氧化物(NOx)年平均", "unit": "μg/m³", "class_I": 50, "class_II": 50, "operator": "<="},
+    {"code": "NOx_24h", "name": "氮氧化物(NOx)24小时平均", "unit": "μg/m³", "class_I": 100, "class_II": 100, "operator": "<="},
+    {"code": "NOx_1h", "name": "氮氧化物(NOx)1小时平均", "unit": "μg/m³", "class_I": 250, "class_II": 250, "operator": "<="},
+    {"code": "Pb_annual", "name": "铅(Pb)年平均", "unit": "μg/m³", "class_I": 0.5, "class_II": 0.5, "operator": "<="},
+    {"code": "Bap_annual", "name": "苯并[a]芘(BaP)年平均", "unit": "μg/m³", "class_I": 0.001, "class_II": 0.001, "operator": "<="}
+  ]
+}

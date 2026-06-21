@@ -1,0 +1,32 @@
+{
+  "standard_code": "GB3838-2002",
+  "title": "地表水环境质量标准",
+  "element_type": "water_surface",
+  "version_year": 2002,
+  "description": "适用于江河、湖泊、运河、渠道、水库等具有使用功能的地表水水域",
+  "class_levels": ["I", "II", "III", "IV", "V"],
+  "parameters": [
+    {"code": "pH", "name": "pH值", "unit": "无量纲", "class_I": [6, 9], "class_II": [6, 9], "class_III": [6, 9], "class_IV": [6, 9], "class_V": [6, 9], "operator": "range"},
+    {"code": "DO", "name": "溶解氧", "unit": "mg/L", "class_I": 7.5, "class_II": 6.0, "class_III": 5.0, "class_IV": 3.0, "class_V": 2.0, "operator": ">="},
+    {"code": "CODMn", "name": "高锰酸盐指数", "unit": "mg/L", "class_I": 2.0, "class_II": 4.0, "class_III": 6.0, "class_IV": 10.0, "class_V": 15.0, "operator": "<="},
+    {"code": "COD", "name": "化学需氧量(COD)", "unit": "mg/L", "class_I": 15.0, "class_II": 15.0, "class_III": 20.0, "class_IV": 30.0, "class_V": 40.0, "operator": "<="},
+    {"code": "BOD5", "name": "五日生化需氧量(BOD5)", "unit": "mg/L", "class_I": 3.0, "class_II": 3.0, "class_III": 4.0, "class_IV": 6.0, "class_V": 10.0, "operator": "<="},
+    {"code": "NH3N", "name": "氨氮(NH3-N)", "unit": "mg/L", "class_I": 0.15, "class_II": 0.5, "class_III": 1.0, "class_IV": 1.5, "class_V": 2.0, "operator": "<="},
+    {"code": "TP", "name": "总磷(以P计)", "unit": "mg/L", "class_I": 0.02, "class_II": 0.1, "class_III": 0.2, "class_IV": 0.3, "class_V": 0.4, "operator": "<=", "note": "湖库0.05(III)"},
+    {"code": "TN", "name": "总氮(湖库,以N计)", "unit": "mg/L", "class_I": 0.2, "class_II": 0.5, "class_III": 1.0, "class_IV": 1.5, "class_V": 2.0, "operator": "<="},
+    {"code": "Cu", "name": "铜", "unit": "mg/L", "class_I": 0.01, "class_II": 1.0, "class_III": 1.0, "class_IV": 1.0, "class_V": 1.0, "operator": "<="},
+    {"code": "Zn", "name": "锌", "unit": "mg/L", "class_I": 0.05, "class_II": 1.0, "class_III": 1.0, "class_IV": 2.0, "class_V": 2.0, "operator": "<="},
+    {"code": "F", "name": "氟化物(以F-计)", "unit": "mg/L", "class_I": 1.0, "class_II": 1.0, "class_III": 1.0, "class_IV": 1.5, "class_V": 1.5, "operator": "<="},
+    {"code": "As", "name": "砷", "unit": "mg/L", "class_I": 0.05, "class_II": 0.05, "class_III": 0.05, "class_IV": 0.1, "class_V": 0.1, "operator": "<="},
+    {"code": "Hg", "name": "汞", "unit": "mg/L", "class_I": 0.00005, "class_II": 0.00005, "class_III": 0.0001, "class_IV": 0.001, "class_V": 0.001, "operator": "<="},
+    {"code": "Cd", "name": "镉", "unit": "mg/L", "class_I": 0.001, "class_II": 0.005, "class_III": 0.005, "class_IV": 0.005, "class_V": 0.01, "operator": "<="},
+    {"code": "Cr6", "name": "六价铬", "unit": "mg/L", "class_I": 0.01, "class_II": 0.05, "class_III": 0.05, "class_IV": 0.05, "class_V": 0.1, "operator": "<="},
+    {"code": "Pb", "name": "铅", "unit": "mg/L", "class_I": 0.01, "class_II": 0.01, "class_III": 0.05, "class_IV": 0.05, "class_V": 0.1, "operator": "<="},
+    {"code": "CN", "name": "氰化物", "unit": "mg/L", "class_I": 0.005, "class_II": 0.05, "class_III": 0.2, "class_IV": 0.2, "class_V": 0.2, "operator": "<="},
+    {"code": "VPH", "name": "挥发酚", "unit": "mg/L", "class_I": 0.002, "class_II": 0.002, "class_III": 0.005, "class_IV": 0.01, "class_V": 0.1, "operator": "<="},
+    {"code": "TPH", "name": "石油类", "unit": "mg/L", "class_I": 0.05, "class_II": 0.05, "class_III": 0.05, "class_IV": 0.5, "class_V": 1.0, "operator": "<="},
+    {"code": "LAS", "name": "阴离子表面活性剂", "unit": "mg/L", "class_I": 0.2, "class_II": 0.2, "class_III": 0.2, "class_IV": 0.3, "class_V": 0.3, "operator": "<="},
+    {"code": "S2", "name": "硫化物", "unit": "mg/L", "class_I": 0.05, "class_II": 0.1, "class_III": 0.2, "class_IV": 0.5, "class_V": 1.0, "operator": "<="},
+    {"code": "FC", "name": "粪大肠菌群", "unit": "个/L", "class_I": 200, "class_II": 2000, "class_III": 10000, "class_IV": 20000, "class_V": 40000, "operator": "<="}
+  ]
+}

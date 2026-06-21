@@ -1,0 +1,27 @@
+# 核心依赖
+sqlalchemy>=2.0
+pandas>=2.0
+numpy>=1.24
+
+# Web 仪表盘
+streamlit>=1.28
+plotly>=5.17
+
+# 地理空间 (可选)
+# geopandas>=0.14
+# folium>=0.17
+
+# 文档处理
+openpyxl>=3.1
+python-docx>=1.0
+xlrd>=2.0
+
+# 数据验证
+pydantic>=2.0
+
+# 测试
+pytest>=7.4
+pytest-cov>=4.1
+
+# 代码质量 (CI)
+flake8>=6.1

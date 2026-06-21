@@ -1,0 +1,21 @@
+{
+  "standard_code": "GB3096-2008",
+  "title": "声环境质量标准",
+  "element_type": "noise",
+  "version_year": 2008,
+  "description": "适用于声环境质量评价与管理",
+  "class_levels": ["0类", "1类", "2类", "3类", "4a类", "4b类"],
+  "parameters": [
+    {"code": "Leq_day", "name": "等效声级 昼间", "unit": "dB(A)", "class_0类": 50, "class_1类": 55, "class_2类": 60, "class_3类": 65, "class_4a类": 70, "class_4b类": 70, "operator": "<="},
+    {"code": "Leq_night", "name": "等效声级 夜间", "unit": "dB(A)", "class_0类": 40, "class_1类": 45, "class_2类": 50, "class_3类": 55, "class_4a类": 55, "class_4b类": 60, "operator": "<="},
+    {"code": "Lmax", "name": "最大声级 夜间", "unit": "dB(A)", "class_0类": null, "class_1类": null, "class_2类": null, "class_3类": null, "class_4a类": null, "class_4b类": null, "operator": "<=", "note": "夜间突发噪声最大值超过标准15dB(A)"}
+  ],
+  "zone_description": {
+    "0类": "康复疗养区等特别需要安静的区域",
+    "1类": "居民住宅、医疗卫生、文化教育、科研设计、行政办公",
+    "2类": "商业金融、集市贸易，或居住/商业/工业混杂",
+    "3类": "工业生产、仓储物流",
+    "4a类": "高速公路、一级公路、二级公路、城市快速路、主干路、次干路",
+    "4b类": "铁路干线两侧"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "standard_code": "GB15618-2018",
+  "title": "土壤环境质量 农用地土壤污染风险管控标准(试行)",
+  "element_type": "soil",
+  "version_year": 2018,
+  "description": "适用于农用地土壤污染风险筛查与分类管理",
+  "class_levels": ["筛查值", "管制值"],
+  "parameters": [
+    {"code": "Cd", "name": "镉", "unit": "mg/kg", "screening_pH<=5.5": 0.3, "screening_5.5<pH<=6.5": 0.3, "screening_6.5<pH<=7.5": 0.3, "screening_pH>7.5": 0.6, "control_pH<=5.5": 1.5, "control_5.5<pH<=6.5": 2.0, "control_6.5<pH<=7.5": 3.0, "control_pH>7.5": 4.0, "note": "水田"},
+    {"code": "Cd_dry", "name": "镉(旱地)", "unit": "mg/kg", "screening_pH<=5.5": 0.3, "screening_5.5<pH<=6.5": 0.3, "screening_6.5<pH<=7.5": 0.3, "screening_pH>7.5": 0.6, "control_pH<=5.5": 1.5, "control_5.5<pH<=6.5": 2.0, "control_6.5<pH<=7.5": 3.0, "control_pH>7.5": 4.0, "note": "旱地"},
+    {"code": "Hg", "name": "汞", "unit": "mg/kg", "screening_pH<=5.5": 0.5, "screening_5.5<pH<=6.5": 0.5, "screening_6.5<pH<=7.5": 0.6, "screening_pH>7.5": 1.0, "control_pH<=5.5": 2.0, "control_5.5<pH<=6.5": 2.5, "control_6.5<pH<=7.5": 4.0, "control_pH>7.5": 6.0, "note": "水田"},
+    {"code": "As", "name": "砷", "unit": "mg/kg", "screening_pH<=5.5": 30, "screening_5.5<pH<=6.5": 30, "screening_6.5<pH<=7.5": 25, "screening_pH>7.5": 20, "control_pH<=5.5": 200, "control_5.5<pH<=6.5": 150, "control_6.5<pH<=7.5": 120, "control_pH>7.5": 100, "note": "水田"},
+    {"code": "Pb", "name": "铅", "unit": "mg/kg", "screening_pH<=5.5": 80, "screening_5.5<pH<=6.5": 100, "screening_6.5<pH<=7.5": 140, "screening_pH>7.5": 240, "control_pH<=5.5": 400, "control_5.5<pH<=6.5": 500, "control_6.5<pH<=7.5": 700, "control_pH>7.5": 1000, "note": "水田"},
+    {"code": "Cr", "name": "铬", "unit": "mg/kg", "screening_pH<=5.5": 250, "screening_5.5<pH<=6.5": 250, "screening_6.5<pH<=7.5": 300, "screening_pH>7.5": 350, "control_pH<=5.5": 800, "control_5.5<pH<=6.5": 850, "control_6.5<pH<=7.5": 1000, "control_pH>7.5": 1300, "note": "水田"},
+    {"code": "Cu", "name": "铜", "unit": "mg/kg", "screening_pH<=5.5": 50, "screening_5.5<pH<=6.5": 50, "screening_6.5<pH<=7.5": 100, "screening_pH>7.5": 100, "control_pH<=5.5": null, "control_5.5<pH<=6.5": null, "control_6.5<pH<=7.5": null, "control_pH>7.5": null, "note": "果园150"},
+    {"code": "Ni", "name": "镍", "unit": "mg/kg", "screening_pH<=5.5": 60, "screening_5.5<pH<=6.5": 70, "screening_6.5<pH<=7.5": 100, "screening_pH>7.5": 190, "control_pH<=5.5": null, "control_5.5<pH<=6.5": null, "control_6.5<pH<=7.5": null, "control_pH>7.5": null},
+    {"code": "Zn", "name": "锌", "unit": "mg/kg", "screening_pH<=5.5": 200, "screening_5.5<pH<=6.5": 200, "screening_6.5<pH<=7.5": 250, "screening_pH>7.5": 300, "control_pH<=5.5": null, "control_5.5<pH<=6.5": null, "control_6.5<pH<=7.5": null, "control_pH>7.5": null}
+  ]
+}
