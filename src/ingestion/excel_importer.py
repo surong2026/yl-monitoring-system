@@ -131,16 +131,71 @@ def _find_column(df: pd.DataFrame, target: str) -> Optional[str]:
 
 
 def _normalize_param_name(name: str) -> str:
-    """标准化参数名为编码"""
-    # 先直接用映射表
-    if name in PARAM_NAME_TO_CODE:
-        return PARAM_NAME_TO_CODE[name]
-    # 尝试去除括号等后匹配
-    clean = re.sub(r'[（(][^)）]*[)）]', '', name).strip()
+    """标准化参数名为编码 (大小写不敏感)"""
+    s = str(name).strip()
+    # 精确匹配
+    if s in PARAM_NAME_TO_CODE:
+        return PARAM_NAME_TO_CODE[s]
+    # 小写匹配
+    s_lower = s.lower()
+    for k, v in PARAM_NAME_TO_CODE.items():
+        if k.lower() == s_lower:
+            return v
+    # 去括号后匹配
+    clean = re.sub(r'[（(][^)）]*[)）]', '', s).strip()
     if clean in PARAM_NAME_TO_CODE:
         return PARAM_NAME_TO_CODE[clean]
+    # 去括号后小写匹配
+    clean_lower = clean.lower()
+    for k, v in PARAM_NAME_TO_CODE.items():
+        if k.lower() == clean_lower:
+            return v
     # 如果本身已经是标准编码
-    return name
+    return s
+
+
+# ======================== 数值解析 ========================
+
+# 非数值标记模式
+_ND_PATTERN = re.compile(
+    r'^(?:ND|nd|N\.?D\.?|未检出|未检出|低于检出限|低于检测限'
+    r'|<检出限|<检测限|—|--|/|\\|-|LOD)$'
+)
+_QUALIFIED_PATTERN = re.compile(r'^[<>≤≥]?\s*(-?\d+\.?\d*)\s*L?\s*$')
+
+def _parse_value(raw) -> Optional[float]:
+    """
+    解析监测值, 兼容中国监测报告常见格式。
+
+    返回 float 或 None (无法解析/未检出)
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        if pd.isna(raw):
+            return None
+        return float(raw)
+
+    s = str(raw).strip()
+
+    # 空值
+    if not s or s == 'nan':
+        return None
+
+    # ND / 未检出 标记
+    if _ND_PATTERN.match(s):
+        return None
+
+    # <0.01 / >100 / ≤0.05 / 0.025L 等
+    m = _QUALIFIED_PATTERN.match(s)
+    if m:
+        return float(m.group(1))
+
+    # 尝试直接转换
+    try:
+        return float(s)
+    except ValueError:
+        return None
 
 
 # ======================== 格式检测 ========================
@@ -294,13 +349,17 @@ class ExcelImporter:
                 site = self._get_or_create_site(session, str(site_code), str(site_name), result)
 
                 for param_col in param_cols:
-                    value = row[param_col]
-                    if pd.isna(value):
+                    raw_value = row[param_col]
+                    if pd.isna(raw_value):
                         continue
+
+                    value = _parse_value(raw_value)
+                    if value is None:
+                        continue  # ND/未检出, 不导入
 
                     param_code = _normalize_param_name(param_col)
                     self._insert_record(session, site, sample_date, param_code,
-                                        float(value), report_no, skip_duplicates, result)
+                                        value, report_no, skip_duplicates, result)
 
             session.commit()
         except Exception as e:
@@ -343,14 +402,18 @@ class ExcelImporter:
 
                 site_name = str(row[site_name_col]) if site_name_col and not pd.isna(row[site_name_col]) else site_code
                 sample_date = self._parse_date(row[date_col]) if date_col else date.today()
-                value = row[value_col]
-                if pd.isna(value):
+                raw_value = row[value_col]
+                if pd.isna(raw_value):
                     continue
+
+                value = _parse_value(raw_value)
+                if value is None:
+                    continue  # ND/未检出, 不导入
 
                 param_code = _normalize_param_name(param_name)
                 site = self._get_or_create_site(session, site_code, site_name, result)
                 self._insert_record(session, site, sample_date, param_code,
-                                    float(value), report_no, skip_duplicates, result)
+                                    value, report_no, skip_duplicates, result)
 
             session.commit()
         except Exception as e:

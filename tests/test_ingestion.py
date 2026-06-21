@@ -226,3 +226,67 @@ class TestExcelFileImport:
                                           report_no="TEST-002")
         assert result.records_imported == 1
         assert result.format_type == "row"
+
+
+# ======================== P1 修复: 非数值解析 ========================
+
+class TestParseValue:
+    def test_normal_float(self, importer):
+        from src.ingestion.excel_importer import _parse_value
+        assert _parse_value(7.3) == 7.3
+        assert _parse_value(0.35) == 0.35
+
+    def test_int_string(self, importer):
+        from src.ingestion.excel_importer import _parse_value
+        assert _parse_value("7") == 7.0
+
+    def test_nd_marks(self, importer):
+        from src.ingestion.excel_importer import _parse_value
+        assert _parse_value("ND") is None
+        assert _parse_value("nd") is None
+        assert _parse_value("未检出") is None
+        assert _parse_value("低于检出限") is None
+        assert _parse_value("—") is None
+        assert _parse_value("<检出限") is None
+
+    def test_qualified_values(self, importer):
+        from src.ingestion.excel_importer import _parse_value
+        assert _parse_value("<0.01") == 0.01
+        assert _parse_value(">100") == 100.0
+        assert _parse_value("≤0.05") == 0.05
+        assert _parse_value("0.025L") == 0.025
+
+    def test_4e_notation(self, importer):
+        from src.ingestion.excel_importer import _parse_value
+        assert _parse_value("4E-05") == 0.00004
+
+    def test_none_and_empty(self, importer):
+        from src.ingestion.excel_importer import _parse_value
+        assert _parse_value(None) is None
+        assert _parse_value("") is None
+
+    def test_import_with_nd(self, importer):
+        """导入含 ND 标记的数据不崩溃"""
+        df = pd.DataFrame([
+            {"断面编码": "S1", "采样日期": "2026-01-15",
+             "pH": "ND", "COD": "<0.01", "NH3N": 0.35},
+        ])
+        result = ImportResult(file_path="", format_type="")
+        importer._import_column_format(df, result, "REP-ND", skip_duplicates=True)
+        # pH="ND" 跳过, COD="<0.01"→0.01 导入, NH3N=0.35 导入
+        assert result.records_imported == 2
+        assert len(result.errors) == 0
+
+
+# ======================== P1 修复: 大小写不敏感 ========================
+
+class TestCaseInsensitive:
+    def test_param_upper(self):
+        assert _normalize_param_name("PH") == "pH"
+        assert _normalize_param_name("ph") == "pH"
+        assert _normalize_param_name("Do") == "DO"
+
+    def test_resolve_column_case(self):
+        df = pd.DataFrame(columns=["SITE_CODE", "站点名称", "PH", "do"])
+        assert _find_column(df, "site_code") == "SITE_CODE"
+        assert _find_column(df, "site_name") == "站点名称"
