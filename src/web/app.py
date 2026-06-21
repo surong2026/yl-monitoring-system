@@ -44,8 +44,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+@st.cache_resource
 def get_db_session():
-    """获取数据库会话"""
+    """获取数据库会话 (缓存 engine, 避免每次重建连接)"""
     from src.database.models import get_engine, get_session
     engine = get_engine(f"sqlite:///{PROJECT_ROOT}/monitoring.db")
     return get_session(engine)
@@ -139,6 +140,9 @@ def page_import():
             importer = ExcelImporter(f"sqlite:///{db_path}")
             result = importer.import_file(tmp_path, element_type=element_type, report_no=report_no or None)
 
+            # 清理临时文件
+            Path(tmp_path).unlink(missing_ok=True)
+
             if result.success:
                 st.success(f"导入完成! {result.records_imported} 条记录, {result.sites_created} 个新站点")
             else:
@@ -188,8 +192,8 @@ def page_assessment():
             all_results = []
 
             for site_code, site_name in zip(site_codes, selected_names):
+                # TODO: N+1查询优化 — 使用 JOIN 批量取所有断面数据
                 records = session.query(MonitoringRecord).filter(
-                    MonitoringRecord.site_code is not None,
                     MonitoringRecord.sample_date == selected_date,
                     MonitoringRecord.element_type == "water_surface",
                     MonitoringRecord.site.has(MonitoringSite.site_code == site_code)
