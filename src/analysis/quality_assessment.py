@@ -18,6 +18,7 @@
 """
 
 import json
+import math
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
@@ -157,6 +158,27 @@ def _is_range_type(value) -> bool:
     """判断限值是否为范围型 (数组)"""
     return isinstance(value, (list, tuple))
 
+def _validate_value(value: float) -> float:
+    """输入守卫: None/NaN/Inf 返回 NaN (由调用方判断)"""
+    if value is None:
+        return float('nan')
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        return float('nan')
+    return value
+
+def _get_do_saturation(water_temp: Optional[float] = None) -> float:
+    """
+    计算饱和溶解氧浓度 (mg/L)
+
+    使用标准公式: DO_f = 468 / (31.6 + T)
+    其中 T 为水温(°C)。
+
+    当未提供水温时, 默认取 20°C: 468/(31.6+20) ≈ 9.07 mg/L
+    (原硬编码 8.0 对应水温约 26.9°C, 对玉林冬季偏高达 24%)
+    """
+    t = water_temp if water_temp is not None else 20.0
+    return 468.0 / (31.6 + t)
+
 
 # ======================== 评价核心算法 ========================
 
@@ -176,6 +198,11 @@ class WaterQualityAssessor:
         - 下限参数 (>=): 值越大越好, ≥限值即为该类 (如 DO)
         - 范围型: 在 [min, max] 内即为该类 (如 pH)
         """
+        # P0 修复: None/NaN 输入守卫
+        value = _validate_value(value)
+        if math.isnan(value):
+            return QualityClass.INFERIOR_V
+
         operator = _get_operator(param_code, self.loader)
 
         # 范围型 (如 pH: [6, 9])
@@ -212,6 +239,11 @@ class WaterQualityAssessor:
         Returns:
             (是否超标, 超标倍数)
         """
+        # P0 修复: None/NaN 输入守卫
+        value = _validate_value(value)
+        if math.isnan(value):
+            return False, 0.0
+
         operator = _get_operator(param_code, self.loader)
 
         # 范围型 (如 pH)
@@ -244,15 +276,21 @@ class WaterQualityAssessor:
         return False, 0.0
 
     def single_factor_index(self, param_code: str, value: float,
-                            target_class: QualityClass = QualityClass.III) -> float:
+                            target_class: QualityClass = QualityClass.III,
+                            water_temp: Optional[float] = None) -> float:
         """
         计算单因子污染指数 Pi
 
         - 常规参数 (<=): Pi = value / limit
         - 范围型 (如 pH): Pi = |value - 7| / |boundary - 7|
         - 下限型 (如 DO): Pi = |DO_f - value| / |DO_f - limit|
-          (DO_f = 468/(31.6+T), 简化取常温饱和值 8.0)
+          DO_f = 468/(31.6+T), 默认 T=20°C
         """
+        # P0 修复: None/NaN 输入守卫
+        value = _validate_value(value)
+        if math.isnan(value):
+            return 0.0
+
         operator = _get_operator(param_code, self.loader)
 
         # 范围型 (pH)
@@ -269,19 +307,19 @@ class WaterQualityAssessor:
 
         # 下限型 (DO)
         if operator == ">=":
-            DO_SAT = 8.0  # 常温饱和溶解氧
+            do_sat = _get_do_saturation(water_temp)
             limit = self.loader.get_limit(param_code, target_class.name)
             if limit is None:
                 return 0.0
             if value <= 0:
                 return limit if limit > 0 else 10.0
-            if value >= DO_SAT:
+            if value >= do_sat:
                 return 0.0
             if value >= limit:
-                denom = DO_SAT - limit
+                denom = do_sat - limit
                 if denom <= 0:
                     denom = 1.0
-                return (DO_SAT - value) / denom
+                return (do_sat - value) / denom
             # 超标: Pi = 1 + (limit - value) / limit
             return 1.0 + (limit - value) / limit if limit > 0 else 1.0
 
@@ -296,7 +334,8 @@ class WaterQualityAssessor:
     def assess_site(self, site_code: str, site_name: str,
                     parameters: Dict[str, float],
                     target_class: QualityClass = QualityClass.III,
-                    detection_limits: Optional[Dict[str, float]] = None) -> SiteAssessment:
+                    detection_limits: Optional[Dict[str, float]] = None,
+                    water_temp: Optional[float] = None) -> SiteAssessment:
         """
         评价单个断面的水质。
 
@@ -306,6 +345,7 @@ class WaterQualityAssessor:
             parameters: {param_code: value} 各参数监测值
             target_class: 目标水质类别 (默认 III 类)
             detection_limits: {param_code: limit} 检出限 (低于检出限的值取 1/2 检出限参与评价)
+            water_temp: 水温 (°C), 用于 DO 饱和溶解氧计算; 不提供则默认 20°C
 
         Returns:
             SiteAssessment 包含完整的评价结果
@@ -332,7 +372,7 @@ class WaterQualityAssessor:
             is_exceed, exceed_multiple = self.check_exceed(param_code, eval_value, target_class)
 
             # 单因子指数
-            si = self.single_factor_index(param_code, eval_value, target_class)
+            si = self.single_factor_index(param_code, eval_value, target_class, water_temp)
 
             results.append(ParameterResult(
                 parameter_code=param_code,
@@ -392,7 +432,8 @@ class WaterQualityAssessor:
         """
         从 DataFrame 批量评价多个断面。
 
-        期望列: site_code, parameter_code, value, site_name(可选), detection_limit(可选)
+        期望列: site_code, parameter_code, value
+        可选: site_name, detection_limit, water_temp
         """
         grouped = df.groupby(site_col)
         assessments = []
@@ -403,10 +444,12 @@ class WaterQualityAssessor:
             dl_dict = {}
             if "detection_limit" in group.columns:
                 dl_dict = dict(zip(group[param_col], group["detection_limit"]))
+            wt = group["water_temp"].iloc[0] if "water_temp" in group.columns else None
 
             assessment = self.assess_site(
                 site_code, str(site_name), params,
-                target_class=target_class, detection_limits=dl_dict
+                target_class=target_class, detection_limits=dl_dict,
+                water_temp=wt
             )
             assessments.append(assessment)
 

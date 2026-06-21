@@ -8,6 +8,8 @@
 4. 断面综合评价
 5. 检出限处理
 6. 边界情况
+7. None/NaN 输入守卫 (P0)
+8. DO 水温校正 (P1)
 """
 
 import pytest
@@ -142,8 +144,8 @@ class TestSingleFactorIndex:
         assert pi > 1.0  # 超标情况 Pi > 1
 
     def test_DO_saturated(self, assessor):
-        """DO 8.0 接近饱和, Pi ≈ 0"""
-        pi = assessor.single_factor_index("DO", 8.0, QualityClass.III)
+        """DO 接近饱和 (20°C时≈9.07), Pi 应小"""
+        pi = assessor.single_factor_index("DO", 9.0, QualityClass.III, water_temp=20.0)
         assert pi == pytest.approx(0.0, abs=0.05)
 
     def test_pH_neutral(self, assessor):
@@ -246,3 +248,87 @@ class TestReport:
         text = assessor.summary_report([result])
         assert "测试" in text
         assert "氨氮" in text
+
+
+# ======================== P0 修复: None/NaN 输入守卫 ========================
+
+class TestNoneNaNGuard:
+    def test_classify_none_value(self, assessor):
+        """None 值不崩溃, 返回劣V"""
+        result = assessor.classify_parameter("NH3N", None)
+        assert result == QualityClass.INFERIOR_V
+
+    def test_classify_nan_value(self, assessor):
+        """NaN 值不崩溃, 返回劣V"""
+        import math
+        result = assessor.classify_parameter("NH3N", float('nan'))
+        assert result == QualityClass.INFERIOR_V
+
+    def test_check_exceed_none(self, assessor):
+        """None 值不崩溃, 返回不超标"""
+        is_exceed, multiple = assessor.check_exceed("NH3N", None)
+        assert is_exceed is False
+        assert multiple == 0.0
+
+    def test_check_exceed_nan(self, assessor):
+        """NaN 值不崩溃"""
+        import math
+        is_exceed, multiple = assessor.check_exceed("NH3N", float('nan'))
+        assert is_exceed is False
+
+    def test_single_factor_none(self, assessor):
+        """None 值返回 Pi=0"""
+        pi = assessor.single_factor_index("NH3N", None)
+        assert pi == 0.0
+
+    def test_single_factor_inf(self, assessor):
+        """Inf 值返回 Pi=0"""
+        import math
+        pi = assessor.single_factor_index("NH3N", float('inf'))
+        assert pi == 0.0
+
+    def test_assess_site_with_none(self, assessor):
+        """包含 None 的参数不影响其他参数评价"""
+        result = assessor.assess_site("S1", "测试", {"NH3N": None, "COD": 10.0})
+        assert result.total_params == 2
+        # COD 10 达标 III类
+        cod_result = [r for r in result.parameter_results if r.parameter_code == "COD"][0]
+        assert cod_result.is_exceed is False
+
+
+# ======================== P1 修复: DO 水温校正 ========================
+
+class TestDOTemperatureCorrection:
+    def test_default_temp_20c(self, assessor):
+        """默认 T=20°C 时 DO_sat = 468/(31.6+20) ≈ 9.07"""
+        from src.analysis.quality_assessment import _get_do_saturation
+        do_sat = _get_do_saturation()
+        assert do_sat == pytest.approx(9.07, abs=0.1)
+
+    def test_winter_temp_10c(self, assessor):
+        """冬季 T=10°C 时 DO_sat ≈ 11.25"""
+        from src.analysis.quality_assessment import _get_do_saturation
+        do_sat = _get_do_saturation(10.0)
+        assert do_sat == pytest.approx(11.25, abs=0.1)
+
+    def test_summer_temp_30c(self, assessor):
+        """夏季 T=30°C 时 DO_sat ≈ 7.60"""
+        from src.analysis.quality_assessment import _get_do_saturation
+        do_sat = _get_do_saturation(30.0)
+        assert do_sat == pytest.approx(7.60, abs=0.1)
+
+    def test_do_index_changes_with_temp(self, assessor):
+        """不同水温下 DO 的 Pi 不同"""
+        pi_20 = assessor.single_factor_index("DO", 5.5, water_temp=20.0)
+        pi_10 = assessor.single_factor_index("DO", 5.5, water_temp=10.0)
+        # 冷水饱和值更高, 相对 deficit 更大 → Pi 更大
+        assert pi_10 > pi_20
+
+    def test_assess_site_with_water_temp(self, assessor):
+        """断面评价传入水温"""
+        result = assessor.assess_site("S1", "测试",
+                                      {"DO": 5.5, "COD": 15.0},
+                                      water_temp=15.0)
+        do_result = [r for r in result.parameter_results if r.parameter_code == "DO"][0]
+        # DO 5.5 在 15°C (DO_sat≈10.0) 时 Pi 应 < 1 (未超标)
+        assert do_result.single_factor_index > 0
