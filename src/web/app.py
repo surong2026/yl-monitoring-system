@@ -131,8 +131,9 @@ def page_import():
         st.markdown("**文件预览**")
         for sheet in xls.sheet_names:
             with st.expander(f"Sheet: {sheet}"):
-                df = pd.read_excel(tmp_path, sheet_name=sheet).head(10)
+                df = pd.read_excel(xls, sheet_name=sheet).head(10)
                 st.dataframe(df, use_container_width=True)
+        xls.close()  # 释放文件句柄
 
         # 导入按钮
         if st.button("导入到数据库", type="primary"):
@@ -140,8 +141,11 @@ def page_import():
             importer = ExcelImporter(f"sqlite:///{db_path}")
             result = importer.import_file(tmp_path, element_type=element_type, report_no=report_no or None)
 
-            # 清理临时文件
-            Path(tmp_path).unlink(missing_ok=True)
+            # 清理临时文件 (Windows 下 pd 可能仍持有句柄, 忽略删除失败)
+            try:
+                Path(tmp_path).unlink()
+            except OSError:
+                pass
 
             if result.success:
                 st.success(f"导入完成! {result.records_imported} 条记录, {result.sites_created} 个新站点")
