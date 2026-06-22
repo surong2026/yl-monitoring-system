@@ -272,7 +272,11 @@ class ExcelImporter:
             # 读取所有 sheet
             xls = pd.ExcelFile(filepath)
             for sheet_name in xls.sheet_names:
-                df = pd.read_excel(filepath, sheet_name=sheet_name)
+                try:
+                    df = pd.read_excel(xls, sheet_name=sheet_name)
+                except Exception as e:
+                    result.errors.append(f"Sheet '{sheet_name}' 读取失败: {e}")
+                    continue
                 if df.empty:
                     continue
                 sheet_result = self._import_dataframe(df, sheet_name, report_no, skip_duplicates)
